@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { formatVnd } from "@/lib/format";
 import AddToCartControl from "@/components/AddToCartControl";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductPage({
   params,
 }: {
