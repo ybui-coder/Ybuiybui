@@ -23,13 +23,13 @@ export default function PaymentQrCard({
       </p>
 
       <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-        <div className="relative h-56 w-40 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-white">
+        <div className="relative aspect-square w-44 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-white p-2">
           <Image
             src="/brand/payment-qr.jpg"
             alt="Mã QR chuyển khoản"
             fill
-            className="object-cover"
-            sizes="160px"
+            className="object-contain p-2"
+            sizes="176px"
           />
         </div>
         <div className="flex-1 text-sm">
