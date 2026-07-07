@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String
+  price       Int
+  imageUrl    String
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+}
+
+model Store {
+  id            String         @id @default(cuid())
+  name          String
+  address       String
+  phone         String         @unique
+  orders        Order[]
+  notifications Notification[]
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  ONLINE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum ShipmentStatus {
+  BOOKED
+  PICKED_UP
+  DELIVERING
+  DELIVERED
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  customerName    String
+  customerPhone   String
+  deliveryAddress String
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id])
+  status          OrderStatus   @default(PENDING)
+  totalAmount     Int
+  items           OrderItem[]
+  payment         Payment?
+  shipment        Shipment?
+  notifications   Notification[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Int
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  amount          Int
+  transactionRef  String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+}
+
+model Shipment {
+  id           String         @id @default(cuid())
+  orderId      String         @unique
+  order        Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shipperName  String
+  trackingCode String
+  status       ShipmentStatus @default(BOOKED)
+  bookedAt     DateTime       @default(now())
+  deliveredAt  DateTime?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

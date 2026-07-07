@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "highlands-dev",
+      "runtimeExecutable": "/Users/travisbui/Downloads/VNM/.tools/node-v22.14.0-darwin-arm64/bin/node",
+      "runtimeArgs": ["/Users/travisbui/Downloads/VNM/.tools/dev-launcher.cjs"],
+      "port": 3000
+    }
+  ]
+}
