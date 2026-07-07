@@ -7,119 +7,95 @@ const adapter = new PrismaBetterSqlite3({
 });
 const prisma = new PrismaClient({ adapter });
 
-const CATEGORIES = [
-  { name: "Cà Phê", slug: "ca-phe" },
-  { name: "Trà", slug: "tra" },
-  { name: "Freeze", slug: "freeze" },
-  { name: "Bánh & Ăn Nhẹ", slug: "banh-an-nhe" },
-];
-
-const PRODUCTS: Record<
-  string,
-  { name: string; slug: string; description: string; price: number; imageUrl: string }[]
-> = {
-  "ca-phe": [
-    {
-      name: "Phin Sữa Đá",
-      slug: "phin-sua-da",
-      description: "Cà phê phin truyền thống pha cùng sữa đặc, đá viên mát lạnh.",
-      price: 39000,
-      imageUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600",
-    },
-    {
-      name: "Bạc Xỉu",
-      slug: "bac-xiu",
-      description: "Vị cà phê nhẹ nhàng hòa quyện cùng sữa tươi và sữa đặc thơm béo.",
-      price: 45000,
-      imageUrl: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600",
-    },
-    {
-      name: "Cà Phê Đen Đá",
-      slug: "ca-phe-den-da",
-      description: "Đậm đà hương vị cà phê phin nguyên bản.",
-      price: 35000,
-      imageUrl: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=600",
-    },
-  ],
-  tra: [
-    {
-      name: "Trà Sen Vàng",
-      slug: "tra-sen-vang",
-      description: "Trà ô long hương sen thanh tao, vị ngọt dịu nhẹ.",
-      price: 49000,
-      imageUrl: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600",
-    },
-    {
-      name: "Trà Xanh Đào",
-      slug: "tra-xanh-dao",
-      description: "Trà xanh kết hợp cùng đào ngâm thơm mát.",
-      price: 49000,
-      imageUrl: "https://images.unsplash.com/photo-1499638673689-79a0b5115d87?w=600",
-    },
-  ],
-  freeze: [
-    {
-      name: "Freeze Trà Xanh",
-      slug: "freeze-tra-xanh",
-      description: "Đá xay trà xanh mịn màng, phủ kem tươi béo ngậy.",
-      price: 55000,
-      imageUrl: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600",
-    },
-    {
-      name: "Freeze Cà Phê",
-      slug: "freeze-ca-phe",
-      description: "Đá xay cà phê đậm vị, phủ kem tươi.",
-      price: 55000,
-      imageUrl: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600",
-    },
-  ],
-  "banh-an-nhe": [
-    {
-      name: "Bánh Mì Que Pate",
-      slug: "banh-mi-que-pate",
-      description: "Bánh mì que giòn rụm cùng pate béo thơm.",
-      price: 25000,
-      imageUrl: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=600",
-    },
-    {
-      name: "Bánh Croissant",
-      slug: "banh-croissant",
-      description: "Bánh sừng bò bơ Pháp thơm lừng.",
-      price: 35000,
-      imageUrl: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600",
-    },
-  ],
+const STORE = {
+  name: "All In Coffee",
+  address: "1B Hoàng Diệu, Quận 4, TP.HCM",
+  phone: "0764917190",
 };
 
-const STORES = [
-  { name: "All-In Coffee Nguyễn Huệ", address: "26 Nguyễn Huệ, Q.1, TP.HCM", phone: "0281234001" },
-  { name: "All-In Coffee Láng Hạ", address: "72 Láng Hạ, Đống Đa, Hà Nội", phone: "0241234002" },
-  { name: "All-In Coffee Hải Châu", address: "15 Trần Phú, Hải Châu, Đà Nẵng", phone: "0231234003" },
+const CATEGORY = { name: "Thực đơn", slug: "thuc-don" };
+
+const PRODUCTS = [
+  {
+    name: "Bạc xỉu",
+    slug: "bac-xiu",
+    description: "Cà phê sữa đá phong cách All In Coffee, béo thơm đậm vị.",
+    price: 45000,
+    imageUrl: "/products/bac-xiu.jpg",
+  },
+  {
+    name: "Bạc xỉu oatside",
+    slug: "bac-xiu-oatside",
+    description: "Bạc xỉu kết hợp sữa yến mạch Oatside thanh nhẹ, béo tự nhiên.",
+    price: 50000,
+    imageUrl: "/products/bac-xiu-oatside.jpg",
+  },
+  {
+    name: "Americano Mơ ổi hồng",
+    slug: "americano-mo-oi-hong",
+    description: "Americano kết hợp mơ và ổi hồng, chua ngọt sảng khoái.",
+    price: 45000,
+    imageUrl: "/products/americano-mo-oi-hong.jpg",
+  },
+  {
+    name: "Double Espresso",
+    slug: "double-espresso",
+    description: "Espresso đúp đậm đà, dành cho tín đồ cà phê nguyên bản.",
+    price: 50000,
+    imageUrl: "/products/double-espresso.jpg",
+  },
+  {
+    name: "Trà bưởi hồng",
+    slug: "tra-buoi-hong",
+    description: "Trà bưởi hồng thanh mát cùng tép bưởi tươi giòn sần sật.",
+    price: 40000,
+    imageUrl: "/products/tra-buoi-hong.jpg",
+  },
+];
+
+const VOUCHERS = [
+  {
+    code: "WELCOME10",
+    description: "Giảm 10% cho đơn đầu tiên",
+    discountType: "PERCENT" as const,
+    discountValue: 10,
+  },
+  {
+    code: "FREESHIP20",
+    description: "Giảm 20.000đ (tương đương miễn phí ship)",
+    discountType: "FIXED" as const,
+    discountValue: 20000,
+  },
+  {
+    code: "SALE15K",
+    description: "Giảm ngay 15.000đ cho mọi đơn hàng",
+    discountType: "FIXED" as const,
+    discountValue: 15000,
+  },
 ];
 
 async function main() {
-  for (const store of STORES) {
-    await prisma.store.upsert({
-      where: { phone: store.phone },
-      update: { name: store.name, address: store.address },
-      create: store,
-    });
+  // Reset toàn bộ dữ liệu cũ (app đang trong giai đoạn dựng, chưa có đơn hàng thật)
+  await prisma.notification.deleteMany();
+  await prisma.shipment.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.voucher.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.store.deleteMany();
+
+  await prisma.store.create({ data: STORE });
+
+  const category = await prisma.category.create({ data: CATEGORY });
+
+  for (const product of PRODUCTS) {
+    await prisma.product.create({ data: { ...product, categoryId: category.id } });
   }
 
-  for (const category of CATEGORIES) {
-    const created = await prisma.category.upsert({
-      where: { slug: category.slug },
-      update: {},
-      create: category,
-    });
-
-    for (const product of PRODUCTS[category.slug]) {
-      await prisma.product.upsert({
-        where: { slug: product.slug },
-        update: {},
-        create: { ...product, categoryId: created.id },
-      });
-    }
+  for (const voucher of VOUCHERS) {
+    await prisma.voucher.create({ data: voucher });
   }
 }
 

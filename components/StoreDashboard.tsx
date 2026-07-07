@@ -21,6 +21,7 @@ export default function StoreDashboard({ storeId }: { storeId: string }) {
   const [orders, setOrders] = useState<OrderDto[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null);
   const toastIdRef = useRef(0);
 
   async function loadOrders() {
@@ -52,6 +53,32 @@ export default function StoreDashboard({ storeId }: { storeId: string }) {
     await fetch(`/api/orders/${orderId}/confirm`, { method: "POST" });
     await loadOrders();
     setConfirmingId(null);
+  }
+
+  async function handleConfirmPayment(orderId: string) {
+    setConfirmingPaymentId(orderId);
+    await fetch(`/api/orders/${orderId}/confirm-payment`, { method: "POST" });
+    await loadOrders();
+    setConfirmingPaymentId(null);
+  }
+
+  function PaymentBadge({ order }: { order: OrderDto }) {
+    if (!order.payment) return null;
+    if (order.payment.method === "COD") {
+      return <span className="text-xs text-foreground/50">COD</span>;
+    }
+    if (order.payment.status === "PAID") {
+      return <span className="text-xs font-medium text-green-600">Online · Đã nhận tiền</span>;
+    }
+    return (
+      <button
+        onClick={() => handleConfirmPayment(order.id)}
+        disabled={confirmingPaymentId === order.id}
+        className="rounded-full border border-brand-gold/50 bg-brand-gold/10 px-2.5 py-1 text-xs font-medium text-brand-dark hover:bg-brand-gold/20 disabled:opacity-60"
+      >
+        {confirmingPaymentId === order.id ? "Đang xác nhận..." : "Online · Xác nhận đã nhận tiền"}
+      </button>
+    );
   }
 
   const pending = orders.filter((o) => o.status === "PENDING");
@@ -87,7 +114,10 @@ export default function StoreDashboard({ storeId }: { storeId: string }) {
                     #{order.id.slice(-6)} — {order.customerName}
                   </p>
                   <p className="text-sm text-foreground/60">{order.deliveryAddress}</p>
-                  <p className="mt-1 text-sm font-medium text-brand">{formatVnd(order.totalAmount)}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm font-medium text-brand">{formatVnd(order.totalAmount)}</p>
+                    <PaymentBadge order={order} />
+                  </div>
                 </div>
                 <button
                   onClick={() => handleConfirm(order.id)}
@@ -116,6 +146,9 @@ export default function StoreDashboard({ storeId }: { storeId: string }) {
                 {STATUS_LABELS[order.status]}
                 {order.shipment ? ` · ${order.shipment.status}` : ""}
               </p>
+              <div className="mt-1">
+                <PaymentBadge order={order} />
+              </div>
             </div>
           ))}
         </div>

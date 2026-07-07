@@ -69,9 +69,10 @@ export default function CartPage() {
       </div>
 
       <div className="mt-8 flex items-center justify-between border-t border-black/10 pt-6">
-        <p className="text-lg font-bold">Tổng cộng</p>
+        <p className="text-lg font-bold">Tạm tính</p>
         <p className="text-2xl font-bold text-brand">{formatVnd(total)}</p>
       </div>
+      <p className="text-right text-xs text-foreground/50">Chưa gồm phí ship, sẽ tính ở bước tiếp theo</p>
 
       <Link
         href="/checkout"

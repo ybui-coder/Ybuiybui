@@ -36,6 +36,14 @@ export interface StoreDto {
   phone: string;
 }
 
+export interface VoucherDto {
+  id: string;
+  code: string;
+  description: string;
+  discountType: "PERCENT" | "FIXED";
+  discountValue: number;
+}
+
 export interface OrderDto {
   id: string;
   customerName: string;
@@ -43,6 +51,9 @@ export interface OrderDto {
   deliveryAddress: string;
   storeId: string;
   status: "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED";
+  subtotal: number;
+  shippingFee: number;
+  discountAmount: number;
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
@@ -50,4 +61,5 @@ export interface OrderDto {
   payment: PaymentDto | null;
   shipment: ShipmentDto | null;
   store: StoreDto;
+  voucher: VoucherDto | null;
 }

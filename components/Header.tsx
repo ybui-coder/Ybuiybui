@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useCartStore } from "@/lib/cart-store";
@@ -37,8 +38,8 @@ export default function Header() {
               <span className="h-0.5 rounded bg-white" />
             </span>
           </button>
-          <Link href="/" className="text-xl font-bold tracking-wide">
-            ☕ All-In<span className="text-brand-gold"> Coffee</span>
+          <Link href="/" className="flex items-center rounded-lg bg-white px-2 py-1">
+            <Image src="/brand/logo.png" alt="All In Coffee" width={140} height={44} className="h-9 w-auto" priority />
           </Link>
         </div>
         <nav className="hidden gap-6 text-sm font-medium sm:flex">

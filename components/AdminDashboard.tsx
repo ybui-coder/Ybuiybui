@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [storeFilter, setStoreFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [advancingId, setAdvancingId] = useState<string | null>(null);
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<string | null>(null);
 
   async function loadOrders() {
     const res = await fetch("/api/orders");
@@ -66,6 +67,13 @@ export default function AdminDashboard() {
     await fetch(`/api/orders/${orderId}/advance-shipment`, { method: "POST" });
     await loadOrders();
     setAdvancingId(null);
+  }
+
+  async function handleConfirmPayment(orderId: string) {
+    setConfirmingPaymentId(orderId);
+    await fetch(`/api/orders/${orderId}/confirm-payment`, { method: "POST" });
+    await loadOrders();
+    setConfirmingPaymentId(null);
   }
 
   return (
@@ -134,6 +142,15 @@ export default function AdminDashboard() {
                   >
                     {order.payment?.status === "PAID" ? "Đã thu" : "Chưa thu"}
                   </span>
+                  {order.payment?.method === "ONLINE" && order.payment.status !== "PAID" && (
+                    <button
+                      onClick={() => handleConfirmPayment(order.id)}
+                      disabled={confirmingPaymentId === order.id}
+                      className="ml-2 rounded-full border border-brand-gold/50 bg-brand-gold/10 px-2.5 py-1 text-xs font-medium text-brand-dark hover:bg-brand-gold/20 disabled:opacity-60"
+                    >
+                      {confirmingPaymentId === order.id ? "..." : "Xác nhận đã nhận tiền"}
+                    </button>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   {order.shipment ? (

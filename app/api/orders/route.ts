@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { emitToStore } from "@/lib/events";
 import { sendOrderNotificationEmail } from "@/lib/email";
+import { SHIPPING_FEE, VN_PHONE_REGEX, isValidAddress } from "@/lib/pricing";
+import { resolveVoucher } from "@/lib/voucher";
 
 const ORDER_INCLUDE = {
   items: { include: { product: true } },
   payment: true,
   shipment: true,
   store: true,
+  voucher: true,
 } as const;
 
 export async function GET(request: NextRequest) {
@@ -34,6 +37,7 @@ interface CreateOrderBody {
   storeId: string;
   paymentMethod: "COD" | "ONLINE";
   items: CreateOrderItem[];
+  voucherCode?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -48,6 +52,20 @@ export async function POST(request: NextRequest) {
     body.items.length === 0
   ) {
     return NextResponse.json({ error: "Thiếu thông tin đơn hàng" }, { status: 400 });
+  }
+
+  if (!VN_PHONE_REGEX.test(body.customerPhone.trim())) {
+    return NextResponse.json(
+      { error: "Số điện thoại không hợp lệ (cần đúng định dạng số di động Việt Nam)" },
+      { status: 400 },
+    );
+  }
+
+  if (!isValidAddress(body.deliveryAddress)) {
+    return NextResponse.json(
+      { error: "Vui lòng nhập địa chỉ cụ thể (số nhà, tên đường...)" },
+      { status: 400 },
+    );
   }
 
   if (body.paymentMethod !== "COD" && body.paymentMethod !== "ONLINE") {
@@ -70,10 +88,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const totalAmount = body.items.reduce((sum, item) => {
+  const subtotal = body.items.reduce((sum, item) => {
     const product = productById.get(item.productId)!;
     return sum + product.price * item.quantity;
   }, 0);
+
+  let discountAmount = 0;
+  let voucherId: string | null = null;
+
+  if (body.voucherCode?.trim()) {
+    const result = await resolveVoucher(body.voucherCode, subtotal);
+    if ("error" in result) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    discountAmount = result.discountAmount;
+    voucherId = result.voucher.id;
+  }
+
+  const totalAmount = Math.max(subtotal + SHIPPING_FEE - discountAmount, 0);
 
   const order = await prisma.$transaction(async (tx) => {
     const createdOrder = await tx.order.create({
@@ -82,6 +114,10 @@ export async function POST(request: NextRequest) {
         customerPhone: body.customerPhone.trim(),
         deliveryAddress: body.deliveryAddress.trim(),
         storeId: body.storeId,
+        subtotal,
+        shippingFee: SHIPPING_FEE,
+        discountAmount,
+        voucherId,
         totalAmount,
         items: {
           create: body.items.map((item) => ({

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "All-In Coffee - Đặt đồ uống online",
-  description: "Website đặt đồ uống kiểu Highlands Coffee kèm hệ thống quản lý đơn hàng tự động",
+  title: "All In Coffee - Đặt đồ uống online",
+  description: "Đặt đồ uống All In Coffee online, giao tận nơi tại TP.HCM",
 };
 
 export default function RootLayout({

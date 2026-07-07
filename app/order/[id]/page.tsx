@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { formatVnd } from "@/lib/format";
 import type { OrderDto } from "@/lib/types";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
+import PaymentQrCard from "@/components/PaymentQrCard";
 
 const SHIPMENT_LABELS: Record<string, string> = {
   BOOKED: "Đã đặt shipper",
@@ -20,7 +21,6 @@ export default function OrderTrackingPage({
   const { id } = use(params);
   const [order, setOrder] = useState<OrderDto | null>(null);
   const [notFound, setNotFound] = useState(false);
-  const [confirmingPayment, setConfirmingPayment] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,15 +44,6 @@ export default function OrderTrackingPage({
     };
   }, [id]);
 
-  async function handleConfirmPayment() {
-    setConfirmingPayment(true);
-    await fetch(`/api/orders/${id}/confirm-payment`, { method: "POST" });
-    const res = await fetch(`/api/orders/${id}`);
-    const data = await res.json();
-    setOrder(data.order);
-    setConfirmingPayment(false);
-  }
-
   if (notFound) {
     return <p className="mx-auto max-w-2xl px-4 py-20 text-center">Không tìm thấy đơn hàng.</p>;
   }
@@ -60,6 +51,8 @@ export default function OrderTrackingPage({
   if (!order) {
     return <p className="mx-auto max-w-2xl px-4 py-20 text-center text-foreground/60">Đang tải...</p>;
   }
+
+  const isPaid = order.payment?.status === "PAID";
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
@@ -70,21 +63,24 @@ export default function OrderTrackingPage({
         <OrderStatusTimeline status={order.status} />
       </div>
 
-      {order.payment?.method === "ONLINE" && order.payment.status !== "PAID" && (
-        <div className="mt-6 rounded-xl border border-brand-gold/40 bg-brand-gold/10 p-5">
-          <p className="font-semibold text-brand-dark">Thanh toán online (giả lập)</p>
-          <p className="mt-1 text-sm text-foreground/70">
-            Đây là trang mô phỏng cổng thanh toán. Bấm nút bên dưới để giả lập webhook xác nhận đã
-            thanh toán thành công.
-          </p>
-          <button
-            onClick={handleConfirmPayment}
-            disabled={confirmingPayment}
-            className="mt-4 rounded-lg bg-brand-gold px-5 py-2 font-semibold text-brand-dark disabled:opacity-60"
-          >
-            {confirmingPayment ? "Đang xử lý..." : "Xác nhận đã thanh toán"}
-          </button>
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="rounded-xl border border-black/10 bg-white p-5">
+          <p className="text-xs text-foreground/60">Giá trị đơn hàng</p>
+          <p className="mt-1 text-xl font-bold text-brand">{formatVnd(order.totalAmount)}</p>
         </div>
+        <div className="rounded-xl border border-black/10 bg-white p-5">
+          <p className="text-xs text-foreground/60">Hình thức thanh toán</p>
+          <p className="mt-1 text-xl font-bold text-brand-dark">
+            {order.payment?.method === "COD" ? "COD" : "Online"}
+          </p>
+          <p className={`text-xs font-medium ${isPaid ? "text-green-600" : "text-amber-600"}`}>
+            {isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
+          </p>
+        </div>
+      </div>
+
+      {order.payment?.method === "ONLINE" && !isPaid && (
+        <PaymentQrCard orderId={order.id} amount={order.totalAmount} />
       )}
 
       {order.shipment && (
@@ -110,16 +106,26 @@ export default function OrderTrackingPage({
             </div>
           ))}
         </div>
-        <div className="mt-4 flex justify-between border-t border-black/10 pt-3 font-bold">
-          <span>Tổng cộng</span>
-          <span className="text-brand">{formatVnd(order.totalAmount)}</span>
+        <div className="mt-4 flex flex-col gap-1.5 border-t border-black/10 pt-3 text-sm">
+          <div className="flex justify-between text-foreground/70">
+            <span>Tạm tính</span>
+            <span>{formatVnd(order.subtotal)}</span>
+          </div>
+          <div className="flex justify-between text-foreground/70">
+            <span>Phí ship</span>
+            <span>{formatVnd(order.shippingFee)}</span>
+          </div>
+          {order.discountAmount > 0 && (
+            <div className="flex justify-between text-green-700">
+              <span>Giảm giá {order.voucher ? `(${order.voucher.code})` : ""}</span>
+              <span>-{formatVnd(order.discountAmount)}</span>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-black/10 pt-2 text-base font-bold">
+            <span>Tổng cộng</span>
+            <span className="text-brand">{formatVnd(order.totalAmount)}</span>
+          </div>
         </div>
-        <p className="mt-3 text-sm text-foreground/60">
-          Thanh toán: {order.payment?.method === "COD" ? "Khi nhận hàng" : "Online"} —{" "}
-          <span className={order.payment?.status === "PAID" ? "text-green-600 font-semibold" : ""}>
-            {order.payment?.status === "PAID" ? "Đã thanh toán" : "Chưa thanh toán"}
-          </span>
-        </p>
       </div>
 
       <div className="mt-6 rounded-xl border border-black/10 bg-white p-6 text-sm">

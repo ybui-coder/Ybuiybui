@@ -64,6 +64,22 @@ enum ShipmentStatus {
   DELIVERED
 }
 
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model Voucher {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  description   String
+  discountType  DiscountType
+  discountValue Int
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  orders        Order[]
+}
+
 model Order {
   id              String        @id @default(cuid())
   customerName    String
@@ -72,7 +88,12 @@ model Order {
   storeId         String
   store           Store         @relation(fields: [storeId], references: [id])
   status          OrderStatus   @default(PENDING)
+  subtotal        Int
+  shippingFee     Int           @default(0)
+  discountAmount  Int           @default(0)
   totalAmount     Int
+  voucherId       String?
+  voucher         Voucher?      @relation(fields: [voucherId], references: [id])
   items           OrderItem[]
   payment         Payment?
   shipment        Shipment?

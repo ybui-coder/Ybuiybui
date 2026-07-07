@@ -30,7 +30,7 @@ export async function sendOrderNotificationEmail(order: OrderForEmail) {
   try {
     const resend = new Resend(apiKey);
     const { data, error } = await resend.emails.send({
-      from: "All-In Coffee <onboarding@resend.dev>",
+      from: "All In Coffee <onboarding@resend.dev>",
       to: NOTIFY_EMAIL,
       subject: `Đơn hàng mới #${order.id.slice(-6)} - ${formatVnd(order.totalAmount)}`,
       html: `

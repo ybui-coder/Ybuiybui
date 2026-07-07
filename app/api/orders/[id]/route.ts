@@ -14,6 +14,7 @@ export async function GET(
       payment: true,
       shipment: true,
       store: true,
+      voucher: true,
     },
   });
 

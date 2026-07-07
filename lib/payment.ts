@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db";
 
 function randomTransactionRef() {
-  return `MOCKPAY${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+  return `MANUAL${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
 }
 
-export async function confirmMockPayment(orderId: string) {
+export async function confirmPayment(orderId: string) {
   const payment = await prisma.payment.findUnique({ where: { orderId } });
   if (!payment) throw new Error("Payment not found");
   if (payment.method !== "ONLINE") {

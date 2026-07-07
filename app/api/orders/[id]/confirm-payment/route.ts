@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { confirmMockPayment } from "@/lib/mock-payment";
+import { confirmPayment } from "@/lib/payment";
 
 export async function POST(
   _request: Request,
@@ -8,7 +8,7 @@ export async function POST(
   const { id } = await params;
 
   try {
-    const payment = await confirmMockPayment(id);
+    const payment = await confirmPayment(id);
     return NextResponse.json({ payment });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Lỗi xác nhận thanh toán";
